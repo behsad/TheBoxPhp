@@ -26,6 +26,61 @@ mysqli_set_charset($link, "utf8");
 //get ad list
 if ($command == "get_ad_list") {
 
+
+    exit();
+}
+
+//get my ad list
+if ($command == "get_my_ad_list") {
+
+    $user_id = $post_data['user_id'];
+    $query = "SELECT * FROM ad WHERE user_id =$user_id";
+
+    $result = mysqli_query($link, $query);
+
+    $ad_list = array();
+
+    while ($row = mysqli_fetch_assoc($result))
+    {
+
+        $ad_list[]=$row;
+
+    }
+
+    echo json_encode($ad_list);
+
+
+
+    exit();
+}
+
+//get bookmark ad list
+if ($command == "get_bookmark_ad_list") {
+    $user_id = $post_data['user_id'];
+
+    $query = "SELECT * FROM bookmark WHERE user_id =$user_id";
+
+    $result = mysqli_query($link, $query);
+
+    $ad_list = array();
+
+
+    while ($row = mysqli_fetch_assoc($result))
+    {
+
+        $query2 = "SELECT * FROM ad WHERE id =".$row['ad_id'];
+
+        $result2 = mysqli_query($link, $query2);
+
+        $row2 = mysqli_fetch_assoc($result2);
+
+        $ad_list[] =$row2;
+
+    }
+    echo json_encode($ad_list);
+
+
+
     exit();
 }
 

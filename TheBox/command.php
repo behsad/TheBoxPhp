@@ -1,10 +1,7 @@
 <?php
 
 
-//$post_data =str_replace("mytext=","",file_get_contents("php://input"));
-
-
-$post_data = $_POST['mytext'];
+$post_data = $_POST['myjson'];
 
 $post_data = json_decode($post_data, true);
 
@@ -73,7 +70,7 @@ if ($command == "get_ad_list") {
 
     }
 
-    echo json_encode($ad_list);
+    echo "<thebox>".json_encode($ad_list)."</thebox>";
 
     exit();
 }
@@ -94,7 +91,7 @@ if ($command == "get_my_ad_list") {
 
     }
 
-    echo json_encode($ad_list);
+    echo "<thebox>".json_encode($ad_list)."</thebox>";
 
 
     exit();
@@ -122,7 +119,7 @@ if ($command == "get_bookmark_ad_list") {
         $ad_list[] = $row2;
 
     }
-    echo json_encode($ad_list);
+    echo "<thebox>".json_encode($ad_list)."</thebox>";
 
 
     exit();
@@ -143,7 +140,7 @@ if ($command == "new_ad") {
     //check if add
 
     if (mysqli_query($link, $query)) {
-        echo "New record created successfully";
+        echo "<thebox>"."New record created successfully"."</thebox>";
     } else {
         echo "Error: " . $query . "<br>" . mysqli_error($link);
 
@@ -159,9 +156,9 @@ if ($command == "upload_image") {
     $image_location = $_FILES['image']['tmp_name'];
     //save temp image nad check
     if (move_uploaded_file($image_location, "images/" . $image_name . ".png")) {
-        echo "image uploaded";
+        echo "<thebox>"."image uploaded"."</thebox>";
     } else {
-        echo "Error - image not uploaded";
+        echo "<thebox>"."Error - image not uploaded"."<thebox>";
     }
 
 
@@ -189,8 +186,8 @@ if ($command == "bookmark_ad") {
         $query = "INSERT INTO bookmark(user_id,ad_id)VALUES ($user_id,$ad_id)";
         mysqli_query($link, $query);
 
-
     }
+    echo "<thebox>"."ok"."</thebox>";
 
 
     exit();
@@ -199,17 +196,27 @@ if ($command == "bookmark_ad") {
 //send activation key
 if ($command == "send_activation_key") {
 
-    echo $activation_key = rand(1000, 9999);
+    //delete old activation key
+    $query = "DELETE FROM activation WHERE mobile ='" . $post_data['mobile'] . "'";
+    mysqli_query($link, $query);
+
+
+    //generate new activation key
+    $activation_key = rand(1000, 9999);
 
     $query = "INSERT INTO activation (mobile,activation_key)VALUES ('" . $post_data['mobile'] . "','$activation_key')";
     mysqli_query($link, $query);
 
+    echo "<thebox>"."activation ok"."</thebox>";
+
     exit();
+
 }
 
 
 //apply activation key
 if ($command == "apply_activation_key") {
+
 
     $mobile = $post_data['mobile'];
     $email = $post_data['email'];
@@ -219,21 +226,44 @@ if ($command == "apply_activation_key") {
     $result = mysqli_query($link, $query);
     $num = mysqli_num_rows($result);
 
-
     //check activation key
     if ($num != 0) {//activation Ok
 
+        //delete old activation key
+        $query = "DELETE FROM activation WHERE mobile ='$mobile'";
+        mysqli_query($link, $query);
+
+
+        $query = "SELECT * FROM user WHERE  mobile = '$mobile'";
+        $result = mysqli_query($link, $query);
+        $num = mysqli_num_rows($result);
 
         //get user agent
         $agent = $_SERVER['HTTP_USER_AGENT'];
 
-        //add user email and mobile number to user table
-        $query = "INSERT INTO user (mobile,email,agent) VALUES ('$mobile','$email','$agent')";
-        mysqli_query($link, $query);
 
+        if ($num == 0) {
+
+            //add user email , mobile number and agent to user table
+            $query = "INSERT INTO user (mobile,email,agent) VALUES ('$mobile','$email','$agent')";
+            mysqli_query($link, $query);
+
+            $user_id = mysqli_insert_id($link);
+
+        } else {
+
+            $row = mysqli_fetch_assoc($result);
+            $user_id=$row['id'];
+
+            //update user email and agent
+            $query = "UPDATE user SET email = '$email',agent = '$agent' WHERE mobile = '$mobile'";
+            mysqli_query($link, $query);
+
+        }
+        echo "<thebox>".$user_id."</thebox>";
 
     } else {//activation Error
-        echo "activation key Error";
+        echo "<thebox>"."activation key Error"."</thebox>";
     }
 
 

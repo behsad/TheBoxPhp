@@ -26,6 +26,54 @@ mysqli_set_charset($link, "utf8");
 //get ad list
 if ($command == "get_ad_list") {
 
+    $location_filter = $post_data['location_filter'];
+    $car_type_filter = $post_data['car_type_filter'];
+    $last_ad_id = $post_data['last_ad_id'];
+
+    $filter = "";
+    if ($location_filter != 0) {
+        $filter = "province=" . $location_filter;
+
+    }
+
+    if ($car_type_filter != 0) {
+        if ($location_filter != 0) {
+            $filter = $filter . " AND ";
+        }
+        $filter = $filter . "car_type=" . $car_type_filter;
+    }
+
+    if ($filter != "") {
+        $filter = "WHERE " . $filter;
+    }
+
+    $filter2 = "";
+    if ($last_ad_id != 0) {
+
+
+        if ($filter != "") {
+            $filter2 = " AND ";
+        } else {
+            $filter2 = " WHERE ";
+        }
+        $filter2 = $filter2 . "id<" . $last_ad_id;
+    }
+
+    //order ads by id in descending type and set limit number for showing the ads
+    $query = "SELECT * FROM ad $filter $filter2 ORDER BY id DESC LIMIT 2 ";
+
+
+    $result = mysqli_query($link, $query);
+
+    $ad_list = array();
+
+    while ($row = mysqli_fetch_assoc($result)) {
+
+        $ad_list[] = $row;
+
+    }
+
+    echo json_encode($ad_list);
 
     exit();
 }
@@ -40,15 +88,13 @@ if ($command == "get_my_ad_list") {
 
     $ad_list = array();
 
-    while ($row = mysqli_fetch_assoc($result))
-    {
+    while ($row = mysqli_fetch_assoc($result)) {
 
-        $ad_list[]=$row;
+        $ad_list[] = $row;
 
     }
 
     echo json_encode($ad_list);
-
 
 
     exit();
@@ -65,20 +111,18 @@ if ($command == "get_bookmark_ad_list") {
     $ad_list = array();
 
 
-    while ($row = mysqli_fetch_assoc($result))
-    {
+    while ($row = mysqli_fetch_assoc($result)) {
 
-        $query2 = "SELECT * FROM ad WHERE id =".$row['ad_id'];
+        $query2 = "SELECT * FROM ad WHERE id =" . $row['ad_id'];
 
         $result2 = mysqli_query($link, $query2);
 
         $row2 = mysqli_fetch_assoc($result2);
 
-        $ad_list[] =$row2;
+        $ad_list[] = $row2;
 
     }
     echo json_encode($ad_list);
-
 
 
     exit();
@@ -185,9 +229,7 @@ if ($command == "apply_activation_key") {
 
         //add user email and mobile number to user table
         $query = "INSERT INTO user (mobile,email,agent) VALUES ('$mobile','$email','$agent')";
-        mysqli_query($link,$query);
-
-
+        mysqli_query($link, $query);
 
 
     } else {//activation Error

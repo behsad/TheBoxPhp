@@ -149,18 +149,23 @@ if ($command == "new_ad") {
 }
 
 //upload image
-if ($command == "upload_image") {
+if (isset($_POST['image'])) {
 
     $image_name = rand(1000000000, 99999999999);
-    //find temp image
-    $image_location = $_FILES['image']['tmp_name'];
-    //save temp image nad check
-    if (move_uploaded_file($image_location, "images/" . $image_name . ".png")) {
-        echo "<thebox>"."image uploaded"."</thebox>";
-    } else {
-        echo "<thebox>"."Error - image not uploaded"."<thebox>";
-    }
+    $image_name = "images/" . $image_name . ".png";
 
+    $imgsrc= base64_decode($_POST['image']);
+
+    $fp = fopen($image_name,'w');
+    fwrite($fp,$imgsrc);
+
+    if(fclose($fp))
+    {
+        echo "<thebox>".$image_name."</thebox>";
+
+    }else{
+        echo "<thebox>"."0"."<thebox>";
+    }
 
     exit();
 }

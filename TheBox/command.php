@@ -1,7 +1,7 @@
 <?php
 
 
-$post_data = $_POST['myjson'];
+$post_data = @$_POST['myjson'];
 
 $post_data = json_decode($post_data, true);
 
@@ -26,6 +26,8 @@ if ($command == "get_ad_list") {
     $location_filter = $post_data['location_filter'];
     $car_type_filter = $post_data['car_type_filter'];
     $last_ad_id = $post_data['last_ad_id'];
+
+    $search_key = $post_data['search_key'];
 
     $filter = "";
     if ($location_filter != 0) {
@@ -56,8 +58,15 @@ if ($command == "get_ad_list") {
         $filter2 = $filter2 . "id<" . $last_ad_id;
     }
 
+    if ($filter != "" || $filter2 != "")
+    {
+        $filter3 = "AND title LIKE '%$search_key%'";
+    }else{
+        $filter3 = " WHERE title LIKE '%$search_key%'";
+    }
+
     //order ads by id in descending type and set limit number for showing the ads
-    $query = "SELECT * FROM ad $filter $filter2 ORDER BY id DESC LIMIT 2 ";
+    $query = "SELECT * FROM ad $filter $filter2 $filter3 ORDER BY id DESC LIMIT 10 ";
 
 
     $result = mysqli_query($link, $query);
@@ -140,7 +149,7 @@ if ($command == "new_ad") {
     //check if add
 
     if (mysqli_query($link, $query)) {
-        echo "<thebox>"."New record created successfully"."</thebox>";
+        echo "<thebox>"."ok"."</thebox>";
     } else {
         echo "Error: " . $query . "<br>" . mysqli_error($link);
 

@@ -25,9 +25,12 @@ if ($command == "get_ad_list") {
 
     $location_filter = $post_data['location_filter'];
     $car_type_filter = $post_data['car_type_filter'];
+
     $last_ad_id = $post_data['last_ad_id'];
 
     $search_key = $post_data['search_key'];
+
+    $user_id = $post_data['user_id'];
 
     $filter = "";
     if ($location_filter != 0) {
@@ -75,6 +78,38 @@ if ($command == "get_ad_list") {
 
     while ($row = mysqli_fetch_assoc($result)) {
 
+
+        //send bookmark boolean
+        if ($user_id!=0)
+        {
+
+            $query2="select * from bookmark where user_id=$user_id and ad_id=".$row['id'];
+
+            $result2=mysqli_query($link,$query2);
+
+            $num=mysqli_num_rows($result2);
+
+            if ($num!=0)
+            {
+                $temp_array=array("bookmark"=>true);
+
+                $row=$row+$temp_array;
+
+            }else{
+
+                $temp_array=array("bookmark"=>false);
+
+                $row=$row+$temp_array;
+            }
+
+
+
+        }else{
+            $temp_array=array("bookmark"=>false);
+            $row=$row+$temp_array;
+        }
+
+
         $ad_list[] = $row;
 
     }
@@ -83,6 +118,31 @@ if ($command == "get_ad_list") {
 
     exit();
 }
+
+
+//get contact details
+if ($command == "get_contact_details") {
+
+    $user_id = $post_data['user_id'];
+
+
+    $query = "SELECT * FROM user WHERE id =$user_id";
+
+    $result = mysqli_query($link, $query);
+
+    if ($row = mysqli_fetch_assoc($result))
+    {
+        echo "<thebox>".json_encode($row)."</thebox>";
+
+    }else{
+        echo "<thebox>error</thebox>";
+
+    }
+
+    exit();
+}
+
+
 
 //get my ad list
 if ($command == "get_my_ad_list") {
@@ -221,7 +281,7 @@ if ($command == "send_activation_key") {
     $query = "INSERT INTO activation (mobile,activation_key)VALUES ('" . $post_data['mobile'] . "','$activation_key')";
     mysqli_query($link, $query);
 
-    echo "<thebox>"."activation ok"."</thebox>";
+    echo "<thebox>"."ok"."</thebox>";
 
     exit();
 

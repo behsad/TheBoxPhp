@@ -156,6 +156,30 @@ if ($command == "get_my_ad_list") {
 
     while ($row = mysqli_fetch_assoc($result)) {
 
+
+
+        $query2="select * from bookmark where user_id=$user_id and ad_id=".$row['id'];
+
+        $result2=mysqli_query($link,$query2);
+
+        $num=mysqli_num_rows($result2);
+
+        if ($num!=0)
+        {
+            $temp_array=array("bookmark"=>true);
+
+            $row=$row+$temp_array;
+
+        }else{
+
+            $temp_array=array("bookmark"=>false);
+
+            $row=$row+$temp_array;
+        }
+
+
+
+
         $ad_list[] = $row;
 
     }
@@ -185,7 +209,19 @@ if ($command == "get_bookmark_ad_list") {
 
         $row2 = mysqli_fetch_assoc($result2);
 
+
+
+
+        $temp_array=array("bookmark"=>true);
+
+        $row2=$row2+$temp_array;
+
+
+
+
         $ad_list[] = $row2;
+
+
 
     }
     echo "<thebox>".json_encode($ad_list)."</thebox>";
@@ -337,9 +373,8 @@ if ($command == "apply_activation_key") {
         echo "<thebox>".$user_id."</thebox>";
 
     } else {//activation Error
-        echo "<thebox>"."activation key Error"."</thebox>";
+        echo "<thebox>"."error"."</thebox>";
     }
-
 
     exit();
 }
